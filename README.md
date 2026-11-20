@@ -30,6 +30,11 @@ question ─▶ vector top-10 ┐
 
 ## 快速开始
 
+**Windows 上最简单**：双击 `启动.bat`，浏览器会自动打开 `http://127.0.0.1:8000`——
+那是一个聊天页（输入问题 → 流式回答 → 引用可看原文），不是 Swagger。
+
+命令行三步：
+
 ```bash
 pip install -r requirements.txt
 python -m scripts.build_index          # 建索引（约 0.4s，1265 个子块）
@@ -40,6 +45,8 @@ python -m scripts.ask "违约金约定过高，法院可以调整吗"
 
 ```bash
 uvicorn app.main:app --reload --port 8000
+# 浏览器打开 http://127.0.0.1:8000        ← 聊天页
+# 接口文档      http://127.0.0.1:8000/docs  ← 调试用
 # 或
 docker compose up --build
 ```

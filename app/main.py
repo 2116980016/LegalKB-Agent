@@ -9,12 +9,15 @@ from __future__ import annotations
 
 import json
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 from app.core.config import Settings
 from app.core.logging import log, new_request_id, setup_logging
@@ -69,6 +72,12 @@ class ChatResponse(BaseModel):
     hits: list
     latency_ms: int
     request_id: str
+
+
+@app.get("/")
+def index() -> FileResponse:
+    """极简聊天页：不用看 Swagger，打开就能问。"""
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.get("/health")
@@ -130,7 +139,11 @@ def chat_stream(req: ChatRequest) -> StreamingResponse:
             from rag.generate.citation import parse_citations
 
             citations = parse_citations(full, ctx)
-            yield f"event: citations\ndata: {json.dumps([{'index': c.index, 'chunk_id': c.chunk_id, 'valid': c.valid} for c in citations], ensure_ascii=False)}\n\n"
+            payload = [
+                {"index": c.index, "chunk_id": c.chunk_id, "valid": c.valid, "text": c.text}
+                for c in citations
+            ]
+            yield f"event: citations\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"
             yield "event: done\ndata: {}\n\n"
         except Exception as exc:
             log("chat.stream_error", level=40, error=str(exc))

@@ -11,6 +11,7 @@ sentence-transformers 的 bge 模型，接口完全一致。
 from __future__ import annotations
 
 import hashlib
+import http.client
 import json
 import math
 import time
@@ -180,7 +181,7 @@ class OpenAICompatEmbedding:
                     time.sleep(2 ** attempt)
                     continue
                 raise RuntimeError(f"embedding 接口返回 {e.code}：{detail}") from e
-            except urllib.error.URLError as e:
+            except (urllib.error.URLError, http.client.HTTPException, ConnectionResetError, TimeoutError) as e:
                 last = e
                 time.sleep(2 ** attempt)
         raise RuntimeError(f"embedding 请求失败：{last}")

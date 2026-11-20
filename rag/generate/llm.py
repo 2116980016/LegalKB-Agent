@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import re
 import time
+import http.client
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -103,6 +104,10 @@ class OpenAICompatLLM:
                     time.sleep(2 ** attempt)  # 指数退避
                     continue
                 raise RuntimeError(f"LLM 接口返回 {e.code}：{detail}") from e
+            except (urllib.error.URLError, http.client.HTTPException, ConnectionResetError, TimeoutError) as e:
+                # 网络抖动 / 对端提前断开（RemoteDisconnected）：重试，不直接失败
+                last_err = e
+                time.sleep(2 ** attempt)
             except urllib.error.URLError as e:  # 网络抖动
                 last_err = e
                 time.sleep(2 ** attempt)
