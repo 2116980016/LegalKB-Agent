@@ -1,0 +1,16 @@
+{"id": "q01", "type": "answerable", "question": "合同里约定的违约金太高了，法院会调整吗？", "anchors": ["第585条"], "note": "考违约金调减规则"}
+{"id": "q02", "type": "answerable", "question": "普通的民事纠纷，向法院请求保护权利的诉讼时效是几年？", "anchors": ["第188条", "三年"], "note": "考诉讼时效"}
+{"id": "q03", "type": "answerable", "question": "男方最早多少岁可以领结婚证？", "anchors": ["第1047条", "二十二周岁"], "note": "考法定婚龄"}
+{"id": "q04", "type": "answerable", "question": "合同一方不履行义务，另一方可以要求他承担什么责任？", "anchors": ["第577条"], "note": "考违约责任形式"}
+{"id": "q05", "type": "answerable", "question": "借钱到期不还，逾期的利息该怎么计算？", "anchors": ["第676条", "逾期利息"], "note": "考借款逾期利息"}
+{"id": "q06", "type": "answerable", "question": "一个民事法律行为要满足哪些条件才算有效？", "anchors": ["第143条"], "note": "考法律行为有效要件"}
+{"id": "q07", "type": "answerable", "question": "签合同时被对方误导，对内容产生了重大误解，还能撤销吗？", "anchors": ["第147条", "重大误解"], "note": "考可撤销行为"}
+{"id": "q08", "type": "answerable", "question": "起诉离婚时，法院在什么情况下会判决准予离婚？", "anchors": ["第1079条"], "note": "考离婚法定情形"}
+{"id": "q09", "type": "answerable", "question": "没有遗嘱的情况下，遗产按照什么顺序继承？", "anchors": ["第1127条", "第一顺序"], "note": "考法定继承顺序"}
+{"id": "q10", "type": "answerable", "question": "公司员工在执行工作任务时撞伤了人，应该由谁来赔偿？", "anchors": ["第1191条", "用人单位"], "note": "考用人单位责任"}
+{"id": "q11", "type": "answerable", "question": "邻居家的狗把我咬伤了，责任由谁承担？", "anchors": ["第1245条"], "note": "考饲养动物致害"}
+{"id": "q12", "type": "answerable", "question": "合同签订以后，当事人应该怎样履行自己的义务？", "anchors": ["第509条", "全面履行"], "note": "考合同履行原则"}
+{"id": "q13", "type": "unanswerable", "question": "修改公司章程需要多少比例的表决权通过？", "anchors": [], "note": "公司法，语料外"}
+{"id": "q14", "type": "unanswerable", "question": "在美国加州离婚，房产一般怎么分割？", "anchors": [], "note": "域外法，语料外"}
+{"id": "q15", "type": "unanswerable", "question": "醉酒驾驶机动车会被判几年？", "anchors": [], "note": "刑法，语料外"}
+{"id": "q16", "type": "unanswerable", "question": "工作日加班，加班费按工资的几倍计算？", "anchors": [], "note": "劳动法，语料外"}

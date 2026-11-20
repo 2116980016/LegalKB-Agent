@@ -1,0 +1,19 @@
+# 密钥
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.tools/
+
+# 索引产物（可由 data/law.txt 重建）
+data/index/
+
+# 编辑器
+.vscode/
+.idea/

@@ -1,0 +1,11 @@
+# 运行必需（离线可跑，无需 API Key）
+numpy>=1.24
+fastapi>=0.110
+uvicorn>=0.27
+python-dotenv>=1.0
+
+# 可选：真实向量模型（GPU 或联网下载权重）
+# sentence-transformers>=3.0
+
+# 可选：大规模索引后端
+# faiss-cpu>=1.8
