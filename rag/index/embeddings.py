@@ -11,7 +11,9 @@ sentence-transformers 的 bge 模型，接口完全一致。
 from __future__ import annotations
 
 import hashlib
+import json
 import math
+import urllib.request
 from typing import Dict, List, Optional, Protocol, Sequence
 
 import numpy as np
@@ -92,10 +94,75 @@ class SentenceTransformerEmbedding:
         return np.asarray(vecs, dtype=np.float32)
 
 
-def build_embedder(provider: str = "hash", dim: int = 512, model: str = "") -> Embedder:
+class OpenAICompatEmbedding:
+    """走 OpenAI 兼容的 /embeddings 接口（DashScope、智谱、vLLM、OpenAI 均可）。
+
+    好处：不需要装 torch（本地 bge 要 2GB+），部署时也不用把模型塞进镜像。
+    代价：每次建索引都要调 API（1260 条 ≈ 130 次请求，几毛钱），且断网不可用。
+    """
+
+    def __init__(
+        self,
+        api_key: str,
+        base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        model: str = "text-embedding-v3",
+        dim: int = 1024,
+        batch_size: int = 10,
+        timeout: int = 60,
+    ):
+        if not api_key:
+            raise ValueError("缺少 embedding API Key：请在 .env 中配置 DASHSCOPE_API_KEY")
+        self.api_key = api_key
+        self.base_url = base_url.rstrip("/")
+        self.model = model
+        self.dim = dim
+        self.batch_size = batch_size
+        self.timeout = timeout
+        self.name = f"api:{model}:{dim}"
+
+    def _post(self, texts: Sequence[str]) -> List[List[float]]:
+        body = json.dumps(
+            {"model": self.model, "input": list(texts), "encoding_format": "float",
+             "dimensions": self.dim},
+            ensure_ascii=False,
+        ).encode("utf-8")
+        req = urllib.request.Request(
+            f"{self.base_url}/embeddings",
+            data=body,
+            headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.api_key}"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+            payload = json.loads(resp.read().decode("utf-8"))
+        data = sorted(payload["data"], key=lambda d: d.get("index", 0))
+        return [d["embedding"] for d in data]
+
+    def encode(self, texts: Sequence[str]) -> np.ndarray:
+        if not texts:
+            return np.zeros((0, self.dim), dtype=np.float32)
+        vectors: List[List[float]] = []
+        for i in range(0, len(texts), self.batch_size):
+            vectors.extend(self._post(texts[i : i + self.batch_size]))
+        return _l2_normalize(np.asarray(vectors, dtype=np.float32))
+
+
+def build_embedder(
+    provider: str = "hash",
+    dim: int = 512,
+    model: str = "",
+    api_key: str = "",
+    base_url: str = "",
+) -> Embedder:
     provider = (provider or "hash").lower()
     if provider == "hash":
         return HashEmbedding(dim=dim)
     if provider in {"bge", "sentence-transformers", "st"}:
         return SentenceTransformerEmbedding(model or "BAAI/bge-small-zh-v1.5")
+    if provider in {"api", "openai", "dashscope", "zhipu"}:
+        return OpenAICompatEmbedding(
+            api_key=api_key,
+            base_url=base_url or "https://dashscope.aliyuncs.com/compatible-mode/v1",
+            model=model or "text-embedding-v3",
+            dim=dim or 1024,
+        )
     raise ValueError(f"未知的 embedding provider: {provider}")

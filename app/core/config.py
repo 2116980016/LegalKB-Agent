@@ -50,6 +50,13 @@ class Settings:
     embedding_provider: str = field(default_factory=lambda: _get("EMBEDDING_PROVIDER", "hash"))
     embedding_dim: int = field(default_factory=lambda: int(_get("EMBEDDING_DIM", "512")))
     embedding_model: str = field(default_factory=lambda: _get("EMBEDDING_MODEL", "BAAI/bge-small-zh-v1.5"))
+    embedding_base_url: str = field(
+        default_factory=lambda: _get("EMBEDDING_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+    )
+    embedding_api_key: str = field(
+        default_factory=lambda: os.environ.get("DASHSCOPE_API_KEY", "").strip()
+        or os.environ.get("EMBEDDING_API_KEY", "").strip()
+    )
     vector_backend: str = field(default_factory=lambda: _get("VECTOR_BACKEND", "numpy"))
     # 检索
     k_vec: int = field(default_factory=lambda: int(_get("K_VEC", "10")))

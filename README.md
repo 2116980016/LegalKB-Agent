@@ -52,6 +52,36 @@ curl -X POST http://127.0.0.1:8000/api/chat \
 
 流式（SSE）：`POST /api/chat/stream`，事件为 `delta` → `citations` → `done`。
 
+## 在线模式（真实模型）
+
+默认配置是离线的（`hash` 向量 + `echo` 桩），**故意如此**：让任何人 clone 下来就能跑、CI 不依赖付费 API。
+要跑真实效果，两条路：
+
+**A. 调用 API（不需要 GPU，最快）**
+
+```bash
+# .env 里：
+#   EMBEDDING_PROVIDER=api
+#   EMBEDDING_DIM=1024
+#   EMBEDDING_MODEL=text-embedding-v3
+#   LLM_PROVIDER=dashscope
+#   LLM_MODEL=qwen-plus
+#   DASHSCOPE_API_KEY=sk-xxx
+
+rm -rf data/index && python -m eval.run --all      # 用真实语义向量重建并评测
+```
+
+**B. 本地 bge（需要 torch，约 2GB）**
+
+```bash
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install sentence-transformers
+# .env 里 EMBEDDING_PROVIDER=bge，然后 rm -rf data/index
+```
+
+两种方式都改完后，`data/index/meta.json` 里的 `embedder` 会变，
+加载时若与当前配置不一致会**直接报错**而不是静默返回垃圾结果。
+
 ## 评测
 
 ```bash

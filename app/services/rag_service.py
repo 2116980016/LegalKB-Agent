@@ -55,11 +55,21 @@ class Stats:
             }
 
 
+def _embedder(settings: Settings):
+    return build_embedder(
+        settings.embedding_provider,
+        dim=settings.embedding_dim,
+        model=settings.embedding_model,
+        api_key=settings.embedding_api_key,
+        base_url=settings.embedding_base_url,
+    )
+
+
 def build_store(settings: Settings) -> IndexStore:
     started = time.perf_counter()
     docs = load_documents(settings.corpus_path)
     chunks = split_parent_child(docs, child_size=settings.child_size, child_overlap=settings.child_overlap)
-    embedder = build_embedder(settings.embedding_provider, dim=settings.embedding_dim, model=settings.embedding_model)
+    embedder = _embedder(settings)
     store = IndexStore.build(
         chunks,
         embedder,
@@ -74,7 +84,7 @@ def build_store(settings: Settings) -> IndexStore:
 
 
 def load_or_build_store(settings: Settings) -> IndexStore:
-    embedder = build_embedder(settings.embedding_provider, dim=settings.embedding_dim, model=settings.embedding_model)
+    embedder = _embedder(settings)
     meta_path = Path(settings.index_dir) / "meta.json"
     if meta_path.exists():
         try:
