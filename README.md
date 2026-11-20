@@ -90,7 +90,7 @@ rag/            核心 RAG（不依赖 app，可单独测）
 ├─ generate/       prompt、LLM 适配、引用解析
 └─ pipeline.py     检索→重排→生成→引用
 eval/           金标集 + 指标 + 一条命令出报告
-tests/          34 个用例（切块/BM25/RRF/引用/端到端/API）
+tests/          25 个用例（切块/BM25/RRF/引用/端到端/API；API 用例需 httpx）
 docs/           架构、ADR
 ```
 
