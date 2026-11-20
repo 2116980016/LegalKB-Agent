@@ -53,6 +53,7 @@ class Settings:
     embedding_base_url: str = field(
         default_factory=lambda: _get("EMBEDDING_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
     )
+    embedding_path: str = field(default_factory=lambda: _get("EMBEDDING_PATH", ""))
     embedding_api_key: str = field(
         default_factory=lambda: os.environ.get("DASHSCOPE_API_KEY", "").strip()
         or os.environ.get("EMBEDDING_API_KEY", "").strip()

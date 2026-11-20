@@ -88,23 +88,46 @@ pip install sentence-transformers
 python -m eval.run --all        # 四种检索策略横向对比，输出 results/
 ```
 
-**离线基线（hash-512-idf 向量 + echo 桩模型，16 题：12 有据 / 4 无据）**
+**A. 真实语义向量（bge-small-zh-v1.5，ONNX/CPU，无需 GPU）**
 
-| 策略 | Recall@3 | Recall@5 | MRR | 引用编号合法率 |
-| :--- | ---: | ---: | ---: | ---: |
-| vector（纯向量） | 66.7% | 75.0% | 0.595 | 100% |
-| bm25（纯关键词） | 83.3% | 91.7% | 0.674 | 100% |
-| hybrid（加权 RRF） | 75.0% | 91.7% | 0.653 | 100% |
-| **hybrid_rerank** | 75.0% | 91.7% | **0.681** | 100% |
+| 策略 | Recall@3 | Recall@5 | MRR | 引用编号合法率 | 检索延迟 |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| **vector（纯向量）** | **100%** | **100%** | **0.903** | 100% | 63 ms |
+| bm25（纯关键词） | 83.3% | 91.7% | 0.674 | 100% | 33 ms |
+| hybrid（加权 RRF） | 91.7% | 100% | 0.882 | 100% | 195 ms |
+| hybrid_rerank（+词面重排） | 83.3% | 91.7% | 0.695 | 100% | 159 ms |
 
-**怎么读这张表**（结论比数字重要）：
+**B. 离线基线（hash-512-idf 向量，用于 CI 与无模型环境）**
 
-- 字面向量（哈希）与 BM25 同源，所以 **hybrid 的 Recall@3 反而低于纯 BM25**：两路没有互补信息，融合只会稀释 BM25 的强项。
-- 但 `hybrid_rerank` 的 **MRR 最高（0.681）**：融合把候选面铺开、重排再把正确结果往前推——召回与排序是两个问题，指标要分开看。
-- 换成语义向量（bge）后，向量支路才会提供互补信号；这一步没跑，所以**这里不写"混合一定更好"**。
-- 生成侧（引用准确率、拒答率）在 echo 桩下无意义，报告里标 `N/A`，接真实 LLM 后再补。
+| 策略 | Recall@3 | Recall@5 | MRR |
+| :--- | ---: | ---: | ---: |
+| vector | 66.7% | 75.0% | 0.595 |
+| bm25 | 83.3% | 91.7% | 0.674 |
+| hybrid | 75.0% | 91.7% | 0.653 |
+| hybrid_rerank | 75.0% | 91.7% | 0.681 |
+
+**怎么读这两张表**（结论比数字重要）：
+
+1. **同一套代码、同一套题，换掉 embedding 后排名完全反转**：哈希向量下 BM25 最强，真语义向量下纯向量 100%。这说明"哪个策略更好"**不可脱离 embedding 讨论**——不写清楚模型版本的评测表没有意义。
+2. **16 题已经被打满（100%）**，指标失去区分度。下一步必须扩到 50–100 题，并加入"同义改写""需要跨条推理"的难题，否则无法衡量优化是否真的有效。
+3. **加模块不等于变好**：词面重排（overlap）叠在语义检索上会让 Recall@3 从 100% 掉到 83.3%——它是字面启发式，会把"语义对但用词不同"的结果压下去。所以默认配置里重排是关闭的；要用就换成 cross-encoder（bge-reranker），而不是这种技巧。
+4. **BM25 在两次实验里都稳定在 83.3%**：条号、专有名词这类精确匹配，语义向量替代不了。混合检索的价值在长尾兜底，不在平均分。
+5. 生成侧（引用准确率、拒答率）需要真实 LLM；当前 LLM 账户不可用，报告里标 `N/A`，不编数。
 
 指标定义与"为什么用锚点不用 chunk id"见 [`eval/metrics.py`](eval/metrics.py) 头部注释。
+
+## 复现这两张表
+
+```bash
+# A. 真语义向量（首次会下载 ~95MB ONNX 模型到 .models/）
+EMBEDDING_PROVIDER=fastembed EMBEDDING_MODEL=BAAI/bge-small-zh-v1.5 \
+EMBEDDING_PATH=.models/bge-small-zh RERANKER=overlap \
+python -m eval.run --all --llm echo --out-dir results/onnx
+
+# B. 离线基线
+EMBEDDING_PROVIDER=hash RERANKER=overlap \
+python -m eval.run --all --llm echo --out-dir results/offline
+```
 
 ## 目录结构
 

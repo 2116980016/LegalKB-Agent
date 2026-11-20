@@ -62,6 +62,7 @@ def _embedder(settings: Settings):
         model=settings.embedding_model,
         api_key=settings.embedding_api_key,
         base_url=settings.embedding_base_url,
+        model_path=settings.embedding_path,
     )
 
 

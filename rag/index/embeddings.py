@@ -96,6 +96,34 @@ class SentenceTransformerEmbedding:
         return np.asarray(vecs, dtype=np.float32)
 
 
+class FastEmbedEmbedding:
+    """本地 ONNX 推理（fastembed），不需要 torch。
+
+    相比 sentence-transformers：装包 ~50MB vs ~2GB，CPU 上够快，
+    适合"想用真模型但没有 GPU / 不想装 torch"的场景。
+
+    model_path 不为空时直接加载本地目录（离线/内网环境用）。
+    """
+
+    def __init__(self, model_name: str = "BAAI/bge-small-zh-v1.5", model_path: str = ""):
+        from fastembed import TextEmbedding  # 延迟导入
+
+        self.model_name = model_name
+        kwargs = {"model_name": model_name}
+        if model_path:
+            kwargs["specific_model_path"] = model_path
+        self.model = TextEmbedding(**kwargs)
+        probe = list(self.model.embed(["维度探测"]))[0]
+        self.dim = int(len(probe))
+        self.name = f"fastembed:{model_name}"
+
+    def encode(self, texts: Sequence[str]) -> np.ndarray:
+        if not texts:
+            return np.zeros((0, self.dim), dtype=np.float32)
+        vectors = [np.asarray(v, dtype=np.float32) for v in self.model.embed(list(texts))]
+        return _l2_normalize(np.vstack(vectors))
+
+
 class OpenAICompatEmbedding:
     """走 OpenAI 兼容的 /embeddings 接口（DashScope、智谱、vLLM、OpenAI 均可）。
 
@@ -143,10 +171,15 @@ class OpenAICompatEmbedding:
                 return [d["embedding"] for d in data]
             except urllib.error.HTTPError as e:
                 last = e
+                detail = ""
+                try:
+                    detail = e.read().decode("utf-8", "ignore")[:300]
+                except Exception:
+                    pass
                 if e.code in (429, 500, 502, 503, 504):
                     time.sleep(2 ** attempt)
                     continue
-                raise
+                raise RuntimeError(f"embedding 接口返回 {e.code}：{detail}") from e
             except urllib.error.URLError as e:
                 last = e
                 time.sleep(2 ** attempt)
@@ -167,12 +200,15 @@ def build_embedder(
     model: str = "",
     api_key: str = "",
     base_url: str = "",
+    model_path: str = "",
 ) -> Embedder:
     provider = (provider or "hash").lower()
     if provider == "hash":
         return HashEmbedding(dim=dim)
     if provider in {"bge", "sentence-transformers", "st"}:
         return SentenceTransformerEmbedding(model or "BAAI/bge-small-zh-v1.5")
+    if provider in {"fastembed", "onnx"}:
+        return FastEmbedEmbedding(model or "BAAI/bge-small-zh-v1.5", model_path=model_path)
     if provider in {"api", "openai", "dashscope", "zhipu"}:
         return OpenAICompatEmbedding(
             api_key=api_key,

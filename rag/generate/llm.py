@@ -94,10 +94,15 @@ class OpenAICompatLLM:
                 return urllib.request.urlopen(self._request(messages, stream), timeout=self.timeout)
             except urllib.error.HTTPError as e:
                 last_err = e
+                detail = ""
+                try:
+                    detail = e.read().decode("utf-8", "ignore")[:300]
+                except Exception:
+                    pass
                 if e.code in (429, 500, 502, 503, 504):
                     time.sleep(2 ** attempt)  # 指数退避
                     continue
-                raise
+                raise RuntimeError(f"LLM 接口返回 {e.code}：{detail}") from e
             except urllib.error.URLError as e:  # 网络抖动
                 last_err = e
                 time.sleep(2 ** attempt)
