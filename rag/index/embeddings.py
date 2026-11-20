@@ -13,6 +13,8 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import time
+import urllib.error
 import urllib.request
 from typing import Dict, List, Optional, Protocol, Sequence
 
@@ -126,16 +128,29 @@ class OpenAICompatEmbedding:
              "dimensions": self.dim},
             ensure_ascii=False,
         ).encode("utf-8")
-        req = urllib.request.Request(
-            f"{self.base_url}/embeddings",
-            data=body,
-            headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.api_key}"},
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-            payload = json.loads(resp.read().decode("utf-8"))
-        data = sorted(payload["data"], key=lambda d: d.get("index", 0))
-        return [d["embedding"] for d in data]
+        last: Optional[Exception] = None
+        for attempt in range(4):
+            req = urllib.request.Request(
+                f"{self.base_url}/embeddings",
+                data=body,
+                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.api_key}"},
+                method="POST",
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                    payload = json.loads(resp.read().decode("utf-8"))
+                data = sorted(payload["data"], key=lambda d: d.get("index", 0))
+                return [d["embedding"] for d in data]
+            except urllib.error.HTTPError as e:
+                last = e
+                if e.code in (429, 500, 502, 503, 504):
+                    time.sleep(2 ** attempt)
+                    continue
+                raise
+            except urllib.error.URLError as e:
+                last = e
+                time.sleep(2 ** attempt)
+        raise RuntimeError(f"embedding 请求失败：{last}")
 
     def encode(self, texts: Sequence[str]) -> np.ndarray:
         if not texts:
