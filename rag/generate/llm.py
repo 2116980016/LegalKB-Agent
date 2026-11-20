@@ -61,6 +61,7 @@ class OpenAICompatLLM:
         temperature: float = 0.1,
         timeout: int = 60,
         max_retries: int = 3,
+        max_tokens: int = 800,
     ):
         if not api_key:
             raise ValueError("缺少 API Key")
@@ -70,11 +71,18 @@ class OpenAICompatLLM:
         self.temperature = temperature
         self.timeout = timeout
         self.max_retries = max_retries
+        self.max_tokens = max_tokens
         self.name = model
 
     def _request(self, messages: List[dict], stream: bool) -> urllib.request.Request:
         body = json.dumps(
-            {"model": self.model, "messages": messages, "temperature": self.temperature, "stream": stream},
+            {
+                "model": self.model,
+                "messages": messages,
+                "temperature": self.temperature,
+                "stream": stream,
+                "max_tokens": self.max_tokens,
+            },
             ensure_ascii=False,
         ).encode("utf-8")
         return urllib.request.Request(

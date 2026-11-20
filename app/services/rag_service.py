@@ -107,6 +107,7 @@ class RAGService:
             api_key=settings.llm_api_key,
             base_url=settings.llm_base_url,
             model=settings.llm_model,
+            max_tokens=settings.llm_max_tokens,
         )
         self.pipeline = RAGPipeline(
             store,
