@@ -109,6 +109,27 @@ document.querySelectorAll('.examples button').forEach(b => {
   b.onclick = () => { qEl.value = b.textContent; ask(); };
 });
 
+// 服务端渲染模式：直接把结果画出来（截图 / 分享链接 / 无 JS 降级）
+if (window.__DEMO__) {
+  const d = window.__DEMO__;
+  addMsg('user', d.question);
+  const bot = addMsg('bot', d.answer);
+  const box = bot.querySelector('.cites');
+  (d.citations || []).forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'cite' + (c.valid ? '' : ' invalid');
+    el.innerHTML = `<span class="no">[片段${c.index}]</span>` + (c.valid ? escapeHtml(c.text) : '（编号不存在，已拦截）');
+    box.appendChild(el);
+  });
+}
+
+// 支持 ?q=问题 直接发起提问（便于截图与分享具体案例）
+const preset = new URLSearchParams(location.search).get('q');
+if (preset && !window.__DEMO__) {
+  qEl.value = preset;
+  setTimeout(() => ask(), 400);
+}
+
 qEl.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(); }
 });

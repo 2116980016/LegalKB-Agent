@@ -14,7 +14,7 @@ from typing import Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.core.config import Settings
@@ -75,9 +75,33 @@ class ChatResponse(BaseModel):
 
 
 @app.get("/")
-def index() -> FileResponse:
-    """极简聊天页：不用看 Swagger，打开就能问。"""
-    return FileResponse(STATIC_DIR / "index.html")
+def index(q: Optional[str] = None, ssr: int = 0) -> Response:
+    """极简聊天页：不用看 Swagger，打开就能问。
+
+    `?q=问题&ssr=1` 走服务端渲染：直接把问答结果写进 HTML。
+    用途：① 截图/文档；② 分享一个"打开就有结果"的链接；③ 无 JS 环境降级。
+    """
+    html = (STATIC_DIR / "index.html").read_text(encoding="utf-8")
+    if not q or not ssr:
+        return HTMLResponse(html)
+    service = get_service()
+    answer = service.answer(q)
+    payload = {
+        "question": q,
+        "answer": answer.text,
+        "citations": [
+            {"index": c.index, "valid": c.valid, "text": c.text} for c in answer.citations
+        ],
+        "latency_ms": answer.latency_ms,
+        "refused": answer.refused,
+    }
+    inject = (
+        "<script>window.__DEMO__ = "
+        + json.dumps(payload, ensure_ascii=False).replace("</", "<\\/")
+        + ";</script></head>"
+    )
+    # 必须注入到 <head>：主脚本在 body 末尾执行，若数据放在 </body> 前就会读不到
+    return HTMLResponse(html.replace("</head>", inject))
 
 
 @app.get("/health")
