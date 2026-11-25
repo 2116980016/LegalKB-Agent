@@ -23,9 +23,7 @@ if str(ROOT) not in sys.path:
 from app.core.config import Settings  # noqa: E402
 from app.services.rag_service import load_or_build_store  # noqa: E402
 from rag.generate.prompt import build_messages  # noqa: E402
-from rag.index.embeddings import build_embedder  # noqa: E402
 from rag.retrieve.hybrid import rrf_fuse  # noqa: E402
-from rag.types import Hit  # noqa: E402
 
 LINE = "─" * 78
 
