@@ -12,15 +12,14 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Dict, List
 
 _LINE = re.compile(r"^(?P<uid>\S+)\s+(?P<code>[A-Z_]+)\s+(?P<article>第\d+条)\s+(?P<rest>.+)$")
 _DATE = re.compile(r"\s+\d{4}-\d{2}-\d{2}\s+")
 _CODE_NAME = {"CIVIL_CODE": "民法典"}
 
 
-def load_legal_corpus(path: str) -> List[Dict[str, str]]:
-    docs: List[Dict[str, str]] = []
+def load_legal_corpus(path: str) -> list[dict[str, str]]:
+    docs: list[dict[str, str]] = []
     for raw in Path(path).read_text(encoding="utf-8").splitlines():
         line = raw.strip()
         if not line:
@@ -47,14 +46,14 @@ def load_legal_corpus(path: str) -> List[Dict[str, str]]:
     return docs
 
 
-def load_text_corpus(path: str) -> List[Dict[str, str]]:
+def load_text_corpus(path: str) -> list[dict[str, str]]:
     """普通 txt：按空行分段，每段一个父块。"""
     text = Path(path).read_text(encoding="utf-8")
     parts = [p.strip() for p in re.split(r"\n\s*\n", text) if p.strip()]
     return [{"id": f"段{i + 1}", "code": "TEXT", "text": p} for i, p in enumerate(parts)]
 
 
-def load_documents(path: str) -> List[Dict[str, str]]:
+def load_documents(path: str) -> list[dict[str, str]]:
     p = Path(path)
     if p.suffix == ".jsonl":
         return [json.loads(line) for line in p.read_text(encoding="utf-8").splitlines() if line.strip()]

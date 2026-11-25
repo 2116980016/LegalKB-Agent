@@ -7,7 +7,6 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Tuple
 
 
 def _load_dotenv() -> None:
@@ -80,7 +79,7 @@ class Settings:
     log_level: str = field(default_factory=lambda: _get("LOG_LEVEL", "INFO"))
 
     @property
-    def weights(self) -> Tuple[float, float]:
+    def weights(self) -> tuple[float, float]:
         return (self.weight_vector, self.weight_bm25)
 
     def describe(self) -> dict:

@@ -3,9 +3,9 @@ from __future__ import annotations
 
 import threading
 import time
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional
 
 from app.core.config import Settings
 from app.core.logging import log
@@ -25,7 +25,7 @@ class Stats:
     errors: int = 0
     prompt_tokens: int = 0
     completion_tokens: int = 0
-    latency_ms: List[int] = field(default_factory=list)
+    latency_ms: list[int] = field(default_factory=list)
     _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
     def record(self, answer: Answer) -> None:
@@ -38,7 +38,7 @@ class Stats:
             if len(self.latency_ms) > 1000:
                 self.latency_ms = self.latency_ms[-500:]
 
-    def snapshot(self) -> Dict[str, float]:
+    def snapshot(self) -> dict[str, float]:
         with self._lock:
             n = len(self.latency_ms)
             avg = sum(self.latency_ms) / n if n else 0.0
@@ -120,16 +120,16 @@ class RAGService:
         )
 
     @classmethod
-    def create(cls, settings: Optional[Settings] = None) -> "RAGService":
+    def create(cls, settings: Settings | None = None) -> RAGService:
         settings = settings or Settings()
         return cls(settings, load_or_build_store(settings))
 
-    def rebuild(self) -> Dict[str, object]:
+    def rebuild(self) -> dict[str, object]:
         self.store = build_store(self.settings)
         self.pipeline.store = self.store
         return {"chunks": len(self.store.chunks), "parents": self.store.meta.n_parents}
 
-    def answer(self, question: str, top_n: Optional[int] = None, strategy: Optional[str] = None) -> Answer:
+    def answer(self, question: str, top_n: int | None = None, strategy: str | None = None) -> Answer:
         answer = self.pipeline.answer(
             question,
             strategy=strategy or self.settings.strategy,
@@ -140,7 +140,7 @@ class RAGService:
             latency_ms=answer.latency_ms, citations=len(answer.citations), hits=len(answer.hits))
         return answer
 
-    def stream(self, question: str, top_n: Optional[int] = None, strategy: Optional[str] = None) -> Iterator[str]:
+    def stream(self, question: str, top_n: int | None = None, strategy: str | None = None) -> Iterator[str]:
         return self.pipeline.stream(
             question,
             strategy=strategy or self.settings.strategy,

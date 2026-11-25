@@ -13,8 +13,8 @@ chunk id 会随切块参数变化，导致"改了 chunk_size，评测集全部�
 """
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence
 
 from rag.types import Answer, Hit
 
@@ -42,9 +42,9 @@ class ItemResult:
     id: str
     type: str
     question: str
-    anchors: List[str]
-    hits: List[Hit]
-    answer: Optional[Answer] = None
+    anchors: list[str]
+    hits: list[Hit]
+    answer: Answer | None = None
     refused: bool = False
     citation_ok: bool = False
     answer_has_anchor: bool = False
@@ -60,19 +60,19 @@ class Report:
     recall5: float = 0.0
     mrr: float = 0.0
     citation_valid_rate: float = 0.0
-    citation_acc: Optional[float] = None
-    answer_hit: Optional[float] = None
-    refusal_precision: Optional[float] = None
-    refusal_recall: Optional[float] = None
+    citation_acc: float | None = None
+    answer_hit: float | None = None
+    refusal_precision: float | None = None
+    refusal_recall: float | None = None
     avg_latency_ms: float = 0.0
     llm: str = "echo"
-    per_item: List[Dict[str, object]] = field(default_factory=list)
+    per_item: list[dict[str, object]] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return self.__dict__.copy()
 
     def markdown(self) -> str:
-        def pct(v: Optional[float]) -> str:
+        def pct(v: float | None) -> str:
             return "N/A" if v is None else f"{v:.1%}"
 
         return (

@@ -11,14 +11,14 @@ from __future__ import annotations
 
 import math
 from collections import Counter
-from typing import Dict, Iterable, List, Sequence, Tuple
+from collections.abc import Iterable, Sequence
 
 
-def tokenize(text: str) -> List[str]:
+def tokenize(text: str) -> list[str]:
     """返回 token 列表（中文含单字与二字组合，英文/数字按词）。"""
-    tokens: List[str] = []
-    cjk_buf: List[str] = []
-    word_buf: List[str] = []
+    tokens: list[str] = []
+    cjk_buf: list[str] = []
+    word_buf: list[str] = []
 
     def flush_cjk() -> None:
         if cjk_buf:
@@ -54,21 +54,21 @@ class BM25:
             raise ValueError("语料为空")
         self.k1 = k1
         self.b = b
-        self.doc_tokens: List[Counter] = [Counter(t) for t in corpus_tokens]
-        self.doc_len: List[int] = [len(t) for t in corpus_tokens]
+        self.doc_tokens: list[Counter] = [Counter(t) for t in corpus_tokens]
+        self.doc_len: list[int] = [len(t) for t in corpus_tokens]
         self.avgdl = sum(self.doc_len) / max(len(self.doc_len), 1)
         self.n_docs = len(self.doc_tokens)
 
         df: Counter = Counter()
         for counter in self.doc_tokens:
             df.update(counter.keys())
-        self.idf: Dict[str, float] = {
+        self.idf: dict[str, float] = {
             term: math.log(1 + (self.n_docs - freq + 0.5) / (freq + 0.5))
             for term, freq in df.items()
         }
 
     @classmethod
-    def from_texts(cls, texts: Iterable[str], **kwargs) -> "BM25":
+    def from_texts(cls, texts: Iterable[str], **kwargs) -> BM25:
         return cls([tokenize(t) for t in texts], **kwargs)
 
     def score(self, query: str, doc_index: int) -> float:
@@ -84,7 +84,7 @@ class BM25:
             total += idf * tf * (self.k1 + 1) / denom
         return total
 
-    def search(self, query: str, top_k: int = 10) -> List[Tuple[int, float]]:
+    def search(self, query: str, top_k: int = 10) -> list[tuple[int, float]]:
         scored = [(i, self.score(query, i)) for i in range(self.n_docs)]
         scored = [item for item in scored if item[1] > 0]
         scored.sort(key=lambda x: x[1], reverse=True)

@@ -8,9 +8,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app.core.config import Settings  # noqa: E402
-from app.core.logging import setup_logging  # noqa: E402
-from app.services.rag_service import build_store  # noqa: E402
+from app.core.config import Settings
+from app.core.logging import setup_logging
+from app.services.rag_service import build_store
 
 
 def main() -> None:

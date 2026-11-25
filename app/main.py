@@ -17,11 +17,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
-STATIC_DIR = Path(__file__).resolve().parent / "static"
-
 from app.core.config import Settings
 from app.core.logging import log, new_request_id, setup_logging
 from app.services.rag_service import RAGService
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 settings = Settings()
 setup_logging(settings.log_level)

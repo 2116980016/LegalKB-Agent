@@ -10,16 +10,15 @@
 from __future__ import annotations
 
 import re
-from typing import List
 
 from rag.types import Answer, Citation, RetrievedContext
 
 CITE_RE = re.compile(r"\[片段\s*(\d+)\]")
 
 
-def parse_citations(text: str, ctx: RetrievedContext, max_len: int = 120) -> List[Citation]:
+def parse_citations(text: str, ctx: RetrievedContext, max_len: int = 120) -> list[Citation]:
     seen = set()
-    citations: List[Citation] = []
+    citations: list[Citation] = []
     for raw in CITE_RE.findall(text):
         idx = int(raw)
         if idx in seen:

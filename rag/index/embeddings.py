@@ -17,7 +17,8 @@ import math
 import time
 import urllib.error
 import urllib.request
-from typing import Dict, List, Optional, Protocol, Sequence
+from collections.abc import Sequence
+from typing import Protocol
 
 import numpy as np
 
@@ -52,10 +53,10 @@ class HashEmbedding:
         self.dim = dim
         self.salt = salt
         self.name = f"hash-{dim}"
-        self.idf: Dict[str, float] = {}
+        self.idf: dict[str, float] = {}
 
-    def fit(self, texts: Sequence[str]) -> "HashEmbedding":
-        df: Dict[str, int] = {}
+    def fit(self, texts: Sequence[str]) -> HashEmbedding:
+        df: dict[str, int] = {}
         for text in texts:
             for tok in set(tokenize(text)):
                 df[tok] = df.get(tok, 0) + 1
@@ -82,7 +83,7 @@ class HashEmbedding:
 class SentenceTransformerEmbedding:
     """bge / m3e 等句向量模型（可选依赖）。"""
 
-    def __init__(self, model_name: str = "BAAI/bge-small-zh-v1.5", device: Optional[str] = None):
+    def __init__(self, model_name: str = "BAAI/bge-small-zh-v1.5", device: str | None = None):
         from sentence_transformers import SentenceTransformer  # 延迟导入
 
         self.model_name = model_name
@@ -115,7 +116,7 @@ class FastEmbedEmbedding:
             kwargs["specific_model_path"] = model_path
         self.model = TextEmbedding(**kwargs)
         probe = list(self.model.embed(["维度探测"]))[0]
-        self.dim = int(len(probe))
+        self.dim = len(probe)
         self.name = f"fastembed:{model_name}"
 
     def encode(self, texts: Sequence[str]) -> np.ndarray:
@@ -151,13 +152,13 @@ class OpenAICompatEmbedding:
         self.timeout = timeout
         self.name = f"api:{model}:{dim}"
 
-    def _post(self, texts: Sequence[str]) -> List[List[float]]:
+    def _post(self, texts: Sequence[str]) -> list[list[float]]:
         body = json.dumps(
             {"model": self.model, "input": list(texts), "encoding_format": "float",
              "dimensions": self.dim},
             ensure_ascii=False,
         ).encode("utf-8")
-        last: Optional[Exception] = None
+        last: Exception | None = None
         for attempt in range(4):
             req = urllib.request.Request(
                 f"{self.base_url}/embeddings",
@@ -189,7 +190,7 @@ class OpenAICompatEmbedding:
     def encode(self, texts: Sequence[str]) -> np.ndarray:
         if not texts:
             return np.zeros((0, self.dim), dtype=np.float32)
-        vectors: List[List[float]] = []
+        vectors: list[list[float]] = []
         for i in range(0, len(texts), self.batch_size):
             vectors.extend(self._post(texts[i : i + self.batch_size]))
         return _l2_normalize(np.asarray(vectors, dtype=np.float32))

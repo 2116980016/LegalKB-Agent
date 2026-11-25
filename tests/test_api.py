@@ -1,9 +1,9 @@
 import pytest
 
 pytest.importorskip("httpx", reason="TestClient 需要 httpx")
-from fastapi.testclient import TestClient  # noqa: E402
+from fastapi.testclient import TestClient
 
-from app.main import app  # noqa: E402
+from app.main import app
 
 
 @pytest.fixture(scope="module")

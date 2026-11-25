@@ -7,11 +7,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from rag.generate.llm import EchoLLM  # noqa: E402
-from rag.index.embeddings import HashEmbedding  # noqa: E402
-from rag.index.store import IndexStore  # noqa: E402
-from rag.ingest.splitter import split_parent_child  # noqa: E402
-from rag.pipeline import RAGPipeline  # noqa: E402
+from rag.generate.llm import EchoLLM
+from rag.index.embeddings import HashEmbedding
+from rag.index.store import IndexStore
+from rag.ingest.splitter import split_parent_child
+from rag.pipeline import RAGPipeline
 
 SAMPLE_DOCS = [
     {

@@ -8,7 +8,7 @@
 """
 from __future__ import annotations
 
-from typing import List, Optional, Sequence
+from collections.abc import Sequence
 
 from rag.index.bm25 import tokenize
 from rag.types import Hit
@@ -17,7 +17,7 @@ from rag.types import Hit
 class IdentityReranker:
     name = "identity"
 
-    def rerank(self, query: str, hits: Sequence[Hit], top_n: int = 5) -> List[Hit]:
+    def rerank(self, query: str, hits: Sequence[Hit], top_n: int = 5) -> list[Hit]:
         return list(hits[:top_n])
 
 
@@ -29,7 +29,7 @@ class OverlapReranker:
     def __init__(self, alpha: float = 0.7):
         self.alpha = alpha
 
-    def rerank(self, query: str, hits: Sequence[Hit], top_n: int = 5) -> List[Hit]:
+    def rerank(self, query: str, hits: Sequence[Hit], top_n: int = 5) -> list[Hit]:
         q_tokens = set(tokenize(query))
         if not q_tokens:
             return list(hits[:top_n])
@@ -47,13 +47,13 @@ class OverlapReranker:
 class CrossEncoderReranker:
     name = "bge-reranker"
 
-    def __init__(self, model_name: str = "BAAI/bge-reranker-base", device: Optional[str] = None):
+    def __init__(self, model_name: str = "BAAI/bge-reranker-base", device: str | None = None):
         from sentence_transformers import CrossEncoder  # 延迟导入
 
         self.model = CrossEncoder(model_name, device=device)
         self.model_name = model_name
 
-    def rerank(self, query: str, hits: Sequence[Hit], top_n: int = 5) -> List[Hit]:
+    def rerank(self, query: str, hits: Sequence[Hit], top_n: int = 5) -> list[Hit]:
         if not hits:
             return []
         pairs = [(query, h.chunk.parent_text or h.chunk.text) for h in hits]

@@ -9,18 +9,16 @@
 """
 from __future__ import annotations
 
-from typing import Dict, List, Tuple
-
 from rag.types import Chunk
 
 
 def split_parent_child(
-    documents: List[Dict[str, str]],
+    documents: list[dict[str, str]],
     child_size: int = 300,
     child_overlap: int = 60,
-) -> List[Chunk]:
+) -> list[Chunk]:
     """documents: [{"id": "第585条", "text": "...", "code": "CIVIL_CODE"}]"""
-    chunks: List[Chunk] = []
+    chunks: list[Chunk] = []
     for doc in documents:
         parent_id = f"p_{doc['id']}"
         parent_text = doc["text"].strip()
@@ -40,11 +38,11 @@ def split_parent_child(
     return chunks
 
 
-def _windows(text: str, size: int, overlap: int) -> List[str]:
+def _windows(text: str, size: int, overlap: int) -> list[str]:
     if len(text) <= size:
         return [text]
     step = max(size - overlap, 1)
-    out: List[str] = []
+    out: list[str] = []
     start = 0
     while start < len(text):
         out.append(text[start : start + size])
@@ -54,7 +52,7 @@ def _windows(text: str, size: int, overlap: int) -> List[str]:
     return out
 
 
-def chunk_stats(chunks: List[Chunk]) -> Dict[str, float]:
+def chunk_stats(chunks: list[Chunk]) -> dict[str, float]:
     if not chunks:
         return {"n": 0}
     sizes = [len(c.text) for c in chunks]

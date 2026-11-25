@@ -9,7 +9,7 @@ k 的作用：压低头部排名的绝对优势，避免某一路的第 1 名直
 """
 from __future__ import annotations
 
-from typing import Dict, List, Sequence, Tuple
+from collections.abc import Sequence
 
 from rag.index.store import IndexStore
 from rag.types import Hit
@@ -20,9 +20,9 @@ def rrf_fuse(
     weights: Sequence[float],
     k: int = 60,
     top_n: int = 10,
-) -> List[Hit]:
-    scores: Dict[str, float] = {}
-    proto: Dict[str, Hit] = {}
+) -> list[Hit]:
+    scores: dict[str, float] = {}
+    proto: dict[str, Hit] = {}
     for hits, weight in zip(ranked_lists, weights):
         for rank, hit in enumerate(hits, start=1):
             scores[hit.chunk.id] = scores.get(hit.chunk.id, 0.0) + weight / (k + rank)
@@ -37,7 +37,7 @@ class HybridRetriever:
         store: IndexStore,
         k_vec: int = 10,
         k_bm25: int = 10,
-        weights: Tuple[float, float] = (0.5, 0.5),
+        weights: tuple[float, float] = (0.5, 0.5),
         rrf_k: int = 60,
         strategy: str = "hybrid",
     ):
@@ -48,7 +48,7 @@ class HybridRetriever:
         self.rrf_k = rrf_k
         self.strategy = strategy
 
-    def retrieve(self, query: str, top_n: int = 5) -> List[Hit]:
+    def retrieve(self, query: str, top_n: int = 5) -> list[Hit]:
         if self.strategy == "vector":
             return self.store.search_vector(query, top_n)
         if self.strategy == "bm25":

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
 
 @dataclass
@@ -13,7 +12,7 @@ class Chunk:
     text: str
     parent_id: str
     parent_text: str
-    meta: Dict[str, str] = field(default_factory=dict)
+    meta: dict[str, str] = field(default_factory=dict)
 
     @property
     def display_text(self) -> str:
@@ -42,23 +41,23 @@ class Citation:
 @dataclass
 class Answer:
     text: str
-    citations: List[Citation]
-    hits: List[Hit]
+    citations: list[Citation]
+    hits: list[Hit]
     refused: bool = False
     latency_ms: int = 0
     prompt_tokens: int = 0
     completion_tokens: int = 0
 
-    def invalid_citations(self) -> List[Citation]:
+    def invalid_citations(self) -> list[Citation]:
         return [c for c in self.citations if not c.valid]
 
 
 @dataclass
 class RetrievedContext:
-    hits: List[Hit]
+    hits: list[Hit]
     query: str
     strategy: str = "hybrid"
-    debug: Dict[str, float] = field(default_factory=dict)
+    debug: dict[str, float] = field(default_factory=dict)
 
     def to_prompt_block(self) -> str:
         lines = []
@@ -66,7 +65,7 @@ class RetrievedContext:
             lines.append(f"[片段{i}] {hit.chunk.parent_text.strip()}")
         return "\n\n".join(lines)
 
-    def find(self, index: int) -> Optional[Hit]:
+    def find(self, index: int) -> Hit | None:
         if 1 <= index <= len(self.hits):
             return self.hits[index - 1]
         return None

@@ -15,21 +15,20 @@ import json
 import sys
 import time
 from pathlib import Path
-from typing import List
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app.core.config import Settings  # noqa: E402
-from app.services.rag_service import RAGService  # noqa: E402
-from eval.metrics import ItemResult, build_report, contains_all  # noqa: E402
-from rag.types import Hit  # noqa: E402
+from app.core.config import Settings
+from app.services.rag_service import RAGService
+from eval.metrics import ItemResult, build_report, contains_all
+from rag.types import Hit
 
 STRATEGIES = ["vector", "bm25", "hybrid", "hybrid_rerank"]
 
 
-def load_dataset(path: str) -> List[dict]:
+def load_dataset(path: str) -> list[dict]:
     items = []
     for line in Path(path).read_text(encoding="utf-8").splitlines():
         if line.strip():
@@ -37,8 +36,8 @@ def load_dataset(path: str) -> List[dict]:
     return items
 
 
-def run_strategy(service: RAGService, dataset: List[dict], strategy: str, top_k: int) -> List[ItemResult]:
-    results: List[ItemResult] = []
+def run_strategy(service: RAGService, dataset: list[dict], strategy: str, top_k: int) -> list[ItemResult]:
+    results: list[ItemResult] = []
     for item in dataset:
         started = time.perf_counter()
         ctx = service.retrieve(item["question"], strategy=strategy, top_n=max(top_k, 5))

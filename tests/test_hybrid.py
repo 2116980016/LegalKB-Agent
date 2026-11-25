@@ -1,4 +1,3 @@
-from rag.index.store import IndexStore
 from rag.retrieve.hybrid import HybridRetriever, rrf_fuse
 from rag.types import Hit
 

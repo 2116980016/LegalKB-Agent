@@ -9,14 +9,14 @@
 """
 from __future__ import annotations
 
+import http.client
 import json
 import re
 import time
-import http.client
 import urllib.error
 import urllib.request
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Iterator, List, Optional
 
 from rag.generate.prompt import REFUSAL
 
@@ -33,7 +33,7 @@ class LLMResponse:
 class EchoLLM:
     name = "echo"
 
-    def complete(self, messages: List[dict]) -> LLMResponse:
+    def complete(self, messages: list[dict]) -> LLMResponse:
         user = messages[-1]["content"] if messages else ""
         matches = _SNIPPET.findall(user)
         if not matches:
@@ -46,7 +46,7 @@ class EchoLLM:
         answer += "\n\n提示：以上为检索结果的归纳，具体适用请结合案件事实与最新法规确认。"
         return LLMResponse(text=answer, prompt_tokens=len(user), completion_tokens=len(answer))
 
-    def stream(self, messages: List[dict]) -> Iterator[str]:
+    def stream(self, messages: list[dict]) -> Iterator[str]:
         text = self.complete(messages).text
         for piece in _chunks(text, 12):
             yield piece
@@ -74,7 +74,7 @@ class OpenAICompatLLM:
         self.max_tokens = max_tokens
         self.name = model
 
-    def _request(self, messages: List[dict], stream: bool) -> urllib.request.Request:
+    def _request(self, messages: list[dict], stream: bool) -> urllib.request.Request:
         body = json.dumps(
             {
                 "model": self.model,
@@ -96,8 +96,8 @@ class OpenAICompatLLM:
             method="POST",
         )
 
-    def _open(self, messages: List[dict], stream: bool):
-        last_err: Optional[Exception] = None
+    def _open(self, messages: list[dict], stream: bool):
+        last_err: Exception | None = None
         for attempt in range(self.max_retries):
             try:
                 return urllib.request.urlopen(self._request(messages, stream), timeout=self.timeout)
@@ -121,7 +121,7 @@ class OpenAICompatLLM:
                 time.sleep(2 ** attempt)
         raise RuntimeError(f"LLM 请求失败：{last_err}")
 
-    def complete(self, messages: List[dict]) -> LLMResponse:
+    def complete(self, messages: list[dict]) -> LLMResponse:
         with self._open(messages, stream=False) as resp:
             data = json.loads(resp.read().decode("utf-8"))
         usage = data.get("usage", {}) or {}
@@ -131,7 +131,7 @@ class OpenAICompatLLM:
             completion_tokens=usage.get("completion_tokens", 0),
         )
 
-    def stream(self, messages: List[dict]) -> Iterator[str]:
+    def stream(self, messages: list[dict]) -> Iterator[str]:
         with self._open(messages, stream=True) as resp:
             for raw in resp:
                 line = raw.decode("utf-8", "ignore").strip()

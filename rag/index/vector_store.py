@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import List, Tuple
 
 import numpy as np
 
@@ -27,7 +26,7 @@ class NumpyVectorIndex:
     def dim(self) -> int:
         return int(self.vectors.shape[1])
 
-    def search(self, query_vec: np.ndarray, top_k: int = 10) -> List[Tuple[int, float]]:
+    def search(self, query_vec: np.ndarray, top_k: int = 10) -> list[tuple[int, float]]:
         if len(self) == 0:
             return []
         q = np.asarray(query_vec, dtype=np.float32).reshape(-1)
@@ -46,7 +45,7 @@ class NumpyVectorIndex:
         )
 
     @classmethod
-    def load(cls, directory: str) -> "NumpyVectorIndex":
+    def load(cls, directory: str) -> NumpyVectorIndex:
         d = Path(directory)
         return cls(np.load(d / "vectors.npy"))
 
@@ -64,7 +63,7 @@ class FaissVectorIndex(NumpyVectorIndex):
         self.index = faiss.IndexFlatIP(self.dim)
         self.index.add(self.vectors)
 
-    def search(self, query_vec: np.ndarray, top_k: int = 10) -> List[Tuple[int, float]]:
+    def search(self, query_vec: np.ndarray, top_k: int = 10) -> list[tuple[int, float]]:
         q = np.asarray(query_vec, dtype=np.float32).reshape(1, -1)
         scores, idx = self.index.search(q, min(top_k, len(self)))
         return [(int(i), float(s)) for i, s in zip(idx[0], scores[0]) if i >= 0]

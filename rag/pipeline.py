@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import time
-from typing import Iterator, List, Optional, Sequence, Tuple
+from collections.abc import Iterator
 
 from rag.generate.citation import is_refusal, parse_citations
 from rag.generate.llm import EchoLLM
@@ -24,7 +24,7 @@ class RAGPipeline:
         llm=None,
         k_vec: int = 10,
         k_bm25: int = 10,
-        weights: Tuple[float, float] = (0.5, 0.5),
+        weights: tuple[float, float] = (0.5, 0.5),
         top_n: int = 5,
         reranker: str = "overlap",
     ):
@@ -41,7 +41,7 @@ class RAGPipeline:
         self,
         query: str,
         strategy: str = "hybrid",
-        top_n: Optional[int] = None,
+        top_n: int | None = None,
         rerank: bool = True,
     ) -> RetrievedContext:
         top_n = top_n or self.top_n
@@ -55,14 +55,14 @@ class RAGPipeline:
         started = time.perf_counter()
         if strategy == "hybrid_rerank":
             candidates = retriever.retrieve(query, top_n=max(top_n, self.k_vec))
-            hits: List[Hit] = self.reranker.rerank(query, candidates, top_n=top_n) if rerank else candidates[:top_n]
+            hits: list[Hit] = self.reranker.rerank(query, candidates, top_n=top_n) if rerank else candidates[:top_n]
         else:
             hits = retriever.retrieve(query, top_n=top_n)
         elapsed = (time.perf_counter() - started) * 1000
         return RetrievedContext(hits=hits, query=query, strategy=strategy, debug={"retrieve_ms": round(elapsed, 1)})
 
     # ---------- 生成 ----------
-    def answer(self, question: str, strategy: str = "hybrid_rerank", top_n: Optional[int] = None) -> Answer:
+    def answer(self, question: str, strategy: str = "hybrid_rerank", top_n: int | None = None) -> Answer:
         started = time.perf_counter()
         ctx = self.retrieve(question, strategy=strategy, top_n=top_n)
         if not ctx.hits:
@@ -81,7 +81,7 @@ class RAGPipeline:
             completion_tokens=resp.completion_tokens,
         )
 
-    def stream(self, question: str, strategy: str = "hybrid_rerank", top_n: Optional[int] = None) -> Iterator[str]:
+    def stream(self, question: str, strategy: str = "hybrid_rerank", top_n: int | None = None) -> Iterator[str]:
         """逐段产出回答文本；调用方负责在结束后补充引用信息。"""
         ctx = self.retrieve(question, strategy=strategy, top_n=top_n)
         if not ctx.hits:
