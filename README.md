@@ -42,6 +42,7 @@ question ─▶ vector top-10 ┐
 ```bash
 pip install -r requirements.txt
 python -m scripts.build_index          # 建索引（约 0.4s，1265 个子块）
+python -m scripts.explain "违约金约定过高，法院可以调整吗"   # 逐步打印整条链路
 python -m scripts.ask "违约金约定过高，法院可以调整吗"
 ```
 
