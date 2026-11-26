@@ -1,0 +1,9 @@
+{
+  "embedder": "hash-512-idf",
+  "dim": 512,
+  "n_chunks": 1401,
+  "n_parents": 1260,
+  "child_size": 150,
+  "child_overlap": 60,
+  "backend": "numpy"
+}
