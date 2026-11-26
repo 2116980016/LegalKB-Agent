@@ -90,6 +90,20 @@ def load_or_build_store(settings: Settings) -> IndexStore:
     if meta_path.exists():
         try:
             store = IndexStore.load(settings.index_dir, embedder)
+            # 索引里的切块参数必须和当前配置一致，否则会"静默用旧产物"——
+            # 表现为：改了 CHILD_SIZE、跑出来的指标一模一样。这类 bug 极难发现，所以强制校验。
+            if (store.meta.child_size, store.meta.child_overlap) != (
+                settings.child_size,
+                settings.child_overlap,
+            ):
+                log(
+                    "index.stale_rebuild",
+                    level=30,
+                    index_child_size=store.meta.child_size,
+                    current_child_size=settings.child_size,
+                    hint="切块参数已变更，自动重建索引",
+                )
+                return build_store(settings)
             log("index.loaded", chunks=len(store.chunks), index_dir=settings.index_dir)
             return store
         except Exception as exc:  # 配置变更/索引损坏 -> 重建

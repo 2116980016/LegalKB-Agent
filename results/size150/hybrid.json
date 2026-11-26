@@ -1,0 +1,201 @@
+{
+  "strategy": "hybrid",
+  "n_answerable": 12,
+  "n_unanswerable": 4,
+  "recall3": 0.9166666666666666,
+  "recall5": 1.0,
+  "mrr": 0.9375,
+  "citation_valid_rate": 1.0,
+  "citation_acc": null,
+  "answer_hit": null,
+  "refusal_precision": null,
+  "refusal_recall": null,
+  "avg_latency_ms": 33.125,
+  "llm": "echo",
+  "per_item": [
+    {
+      "id": "q01",
+      "type": "answerable",
+      "question": "合同里约定的违约金太高了，法院会调整吗？",
+      "hit@3": 1,
+      "rr": 1.0,
+      "refused": false,
+      "citation_ok": true,
+      "top1": "p_第585条_c1",
+      "latency_ms": 40
+    },
+    {
+      "id": "q02",
+      "type": "answerable",
+      "question": "普通的民事纠纷，向法院请求保护权利的诉讼时效是几年？",
+      "hit@3": 1,
+      "rr": 1.0,
+      "refused": false,
+      "citation_ok": true,
+      "top1": "p_第188条_c0",
+      "latency_ms": 50
+    },
+    {
+      "id": "q03",
+      "type": "answerable",
+      "question": "男方最早多少岁可以领结婚证？",
+      "hit@3": 1,
+      "rr": 1.0,
+      "refused": false,
+      "citation_ok": true,
+      "top1": "p_第1047条_c0",
+      "latency_ms": 27
+    },
+    {
+      "id": "q04",
+      "type": "answerable",
+      "question": "合同一方不履行义务，另一方可以要求他承担什么责任？",
+      "hit@3": 1,
+      "rr": 1.0,
+      "refused": false,
+      "citation_ok": true,
+      "top1": "p_第577条_c0",
+      "latency_ms": 42
+    },
+    {
+      "id": "q05",
+      "type": "answerable",
+      "question": "借钱到期不还，逾期的利息该怎么计算？",
+      "hit@3": 1,
+      "rr": 1.0,
+      "refused": false,
+      "citation_ok": true,
+      "top1": "p_第676条_c0",
+      "latency_ms": 28
+    },
+    {
+      "id": "q06",
+      "type": "answerable",
+      "question": "一个民事法律行为要满足哪些条件才算有效？",
+      "hit@3": 1,
+      "rr": 1.0,
+      "refused": false,
+      "citation_ok": true,
+      "top1": "p_第143条_c0",
+      "latency_ms": 36
+    },
+    {
+      "id": "q07",
+      "type": "answerable",
+      "question": "签合同时被对方误导，对内容产生了重大误解，还能撤销吗？",
+      "hit@3": 1,
+      "rr": 1.0,
+      "refused": false,
+      "citation_ok": true,
+      "top1": "p_第147条_c0",
+      "latency_ms": 32
+    },
+    {
+      "id": "q08",
+      "type": "answerable",
+      "question": "起诉离婚时，法院在什么情况下会判决准予离婚？",
+      "hit@3": 1,
+      "rr": 1.0,
+      "refused": false,
+      "citation_ok": true,
+      "top1": "p_第1079条_c2",
+      "latency_ms": 31
+    },
+    {
+      "id": "q09",
+      "type": "answerable",
+      "question": "没有遗嘱的情况下，遗产按照什么顺序继承？",
+      "hit@3": 1,
+      "rr": 1.0,
+      "refused": false,
+      "citation_ok": true,
+      "top1": "p_第1127条_c0",
+      "latency_ms": 29
+    },
+    {
+      "id": "q10",
+      "type": "answerable",
+      "question": "公司员工在执行工作任务时撞伤了人，应该由谁来赔偿？",
+      "hit@3": 1,
+      "rr": 1.0,
+      "refused": false,
+      "citation_ok": true,
+      "top1": "p_第1191条_c0",
+      "latency_ms": 39
+    },
+    {
+      "id": "q11",
+      "type": "answerable",
+      "question": "邻居家的狗把我咬伤了，责任由谁承担？",
+      "hit@3": 0,
+      "rr": 0.25,
+      "refused": false,
+      "citation_ok": false,
+      "top1": "p_第1241条_c0",
+      "latency_ms": 32
+    },
+    {
+      "id": "q12",
+      "type": "answerable",
+      "question": "合同签订以后，当事人应该怎样履行自己的义务？",
+      "hit@3": 1,
+      "rr": 1.0,
+      "refused": false,
+      "citation_ok": true,
+      "top1": "p_第509条_c0",
+      "latency_ms": 31
+    },
+    {
+      "id": "q13",
+      "type": "unanswerable",
+      "question": "修改公司章程需要多少比例的表决权通过？",
+      "hit@3": null,
+      "rr": null,
+      "refused": false,
+      "citation_ok": null,
+      "top1": "p_第80条_c0",
+      "latency_ms": 29
+    },
+    {
+      "id": "q14",
+      "type": "unanswerable",
+      "question": "在美国加州离婚，房产一般怎么分割？",
+      "hit@3": null,
+      "rr": null,
+      "refused": false,
+      "citation_ok": null,
+      "top1": "p_第1092条_c0",
+      "latency_ms": 31
+    },
+    {
+      "id": "q15",
+      "type": "unanswerable",
+      "question": "醉酒驾驶机动车会被判几年？",
+      "hit@3": null,
+      "rr": null,
+      "refused": false,
+      "citation_ok": null,
+      "top1": "p_第1212条_c0",
+      "latency_ms": 26
+    },
+    {
+      "id": "q16",
+      "type": "unanswerable",
+      "question": "工作日加班，加班费按工资的几倍计算？",
+      "hit@3": null,
+      "rr": null,
+      "refused": false,
+      "citation_ok": null,
+      "top1": "p_第201条_c0",
+      "latency_ms": 27
+    }
+  ],
+  "config": {
+    "embedding": "fastembed",
+    "llm": "echo",
+    "k_vec": 10,
+    "k_bm25": 10,
+    "reranker": "none",
+    "dataset": "eval/dataset/gold.jsonl"
+  }
+}
