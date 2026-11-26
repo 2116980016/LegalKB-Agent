@@ -26,7 +26,7 @@ class RAGPipeline:
         k_bm25: int = 10,
         weights: tuple[float, float] = (0.5, 0.5),
         top_n: int = 5,
-        reranker: str = "overlap",
+        reranker="overlap",
     ):
         self.store = store
         self.llm = llm or EchoLLM()
@@ -34,7 +34,11 @@ class RAGPipeline:
         self.k_bm25 = k_bm25
         self.weights = weights
         self.top_n = top_n
-        self.reranker = build_reranker(reranker) if reranker else IdentityReranker()
+        # 允许传入已构建好的重排对象（需要 model_path 等额外参数时由调用方构建）
+        if isinstance(reranker, str):
+            self.reranker = build_reranker(reranker) if reranker else IdentityReranker()
+        else:
+            self.reranker = reranker
 
     # ---------- 检索 ----------
     def retrieve(

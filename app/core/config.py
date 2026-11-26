@@ -63,6 +63,8 @@ class Settings:
     k_bm25: int = field(default_factory=lambda: int(_get("K_BM25", "10")))
     top_n: int = field(default_factory=lambda: int(_get("TOP_N", "5")))
     reranker: str = field(default_factory=lambda: _get("RERANKER", "overlap"))
+    reranker_model: str = field(default_factory=lambda: _get("RERANKER_MODEL", "BAAI/bge-reranker-base"))
+    reranker_path: str = field(default_factory=lambda: _get("RERANKER_PATH", ""))
     rrf_k: int = field(default_factory=lambda: int(_get("RRF_K", "60")))
     strategy: str = field(default_factory=lambda: _get("STRATEGY", "hybrid_rerank"))
     weight_vector: float = field(default_factory=lambda: float(_get("WEIGHT_VECTOR", "0.5")))

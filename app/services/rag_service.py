@@ -15,6 +15,7 @@ from rag.index.store import IndexStore
 from rag.ingest.loader import load_documents
 from rag.ingest.splitter import chunk_stats, split_parent_child
 from rag.pipeline import RAGPipeline
+from rag.retrieve.rerank import build_reranker
 from rag.types import Answer, RetrievedContext
 
 
@@ -64,6 +65,14 @@ def _embedder(settings: Settings):
         base_url=settings.embedding_base_url,
         model_path=settings.embedding_path,
     )
+
+
+def _build_reranker(settings: Settings):
+    """onnx/fastembed 重排需要模型路径，其它类型直接返回字符串交给 pipeline 构建。"""
+    kind = (settings.reranker or "").lower()
+    if kind in {"onnx", "fastembed"}:
+        return build_reranker(kind, model_name=settings.reranker_model, model_path=settings.reranker_path)
+    return settings.reranker
 
 
 def build_store(settings: Settings) -> IndexStore:
@@ -130,7 +139,7 @@ class RAGService:
             k_bm25=settings.k_bm25,
             weights=settings.weights,
             top_n=settings.top_n,
-            reranker=settings.reranker,
+            reranker=_build_reranker(settings),
         )
 
     @classmethod

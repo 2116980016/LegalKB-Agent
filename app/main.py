@@ -112,6 +112,8 @@ def health() -> dict:
         "index": service.store.meta.to_dict(),
         "config": settings.describe(),
         "stats": service.stats.snapshot(),
+        "reranker": settings.reranker,
+        "top_n": settings.top_n,
     }
 
 

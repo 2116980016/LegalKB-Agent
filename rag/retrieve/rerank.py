@@ -44,6 +44,34 @@ class OverlapReranker:
         return scored[:top_n]
 
 
+class FastEmbedReranker:
+    """基于 fastembed 的 cross-encoder 重排（ONNX，不需要 torch）。
+
+    与 CrossEncoderReranker 的区别：只依赖 fastembed + onnxruntime（约 50MB），
+    不用装 2GB 的 torch，适合在 CPU / 笔记本上验证"重排到底有没有用"。
+    """
+
+    name = "bge-reranker-onnx"
+
+    def __init__(self, model_name: str = "BAAI/bge-reranker-base", model_path: str = ""):
+        from fastembed.rerank.cross_encoder import TextCrossEncoder  # 延迟导入
+
+        kwargs = {"model_name": model_name}
+        if model_path:
+            kwargs["specific_model_path"] = model_path
+        self.model = TextCrossEncoder(**kwargs)
+        self.model_name = model_name
+
+    def rerank(self, query: str, hits: Sequence[Hit], top_n: int = 5) -> list[Hit]:
+        if not hits:
+            return []
+        docs = [h.chunk.parent_text or h.chunk.text for h in hits]
+        scores = list(self.model.rerank(query, docs))
+        out = [Hit(chunk=h.chunk, score=float(s), source="rerank") for h, s in zip(hits, scores)]
+        out.sort(key=lambda x: x.score, reverse=True)
+        return out[:top_n]
+
+
 class CrossEncoderReranker:
     name = "bge-reranker"
 
@@ -69,6 +97,8 @@ def build_reranker(kind: str = "overlap", **kwargs):
         return IdentityReranker()
     if kind in {"overlap", "lexical"}:
         return OverlapReranker(**kwargs)
+    if kind in {"onnx", "fastembed"}:
+        return FastEmbedReranker(**kwargs)
     if kind in {"bge", "cross-encoder", "crossencoder"}:
         return CrossEncoderReranker(**kwargs)
     raise ValueError(f"未知的 reranker: {kind}")
